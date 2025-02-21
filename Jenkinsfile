@@ -5,6 +5,10 @@ pipeline {
         maven 'Maven 3.9.9'  // Use the Maven you configured in Jenkins
     }
 
+    triggers {
+        pollSCM('H/5 * * * *')  // Poll SCM every 5 minutes
+    }
+
     stages {
         stage('Checkout') {
             steps {
