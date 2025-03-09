@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'aliciansingca/comp367-webapp'
+        DOCKER_IMAGE = 'aliciansingca/comp367-webapp'  // Docker image name
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'  // Set in Jenkins credentials
     }
 
