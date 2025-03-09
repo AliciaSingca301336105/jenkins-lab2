@@ -1,46 +1,49 @@
 pipeline {
-    agent any  // Runs on any available Jenkins agent
+    agent any
 
-    tools {
-        maven 'Maven 3.9.9'  // Use the Maven you configured in Jenkins
+    environment {
+        DOCKER_IMAGE = 'aliciansingca/comp367-webapp'
+        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'  // Set in Jenkins credentials
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Clones your GitHub repo
-                git branch: 'main', url: 'https://github.com/AliciaSingca301336105/jenkins-lab2.git'
-            }
-        }
-        
-        stage('Build') {
-            steps {
-                // Build the Maven Web App
-                bat 'mvn clean package'
-            }
-        }
-        
-        stage('Test') {
-            steps {
-                // Run tests (if you have any)
-                bat 'mvn test'
+                git 'https://github.com/AliciaSingca301336105/jenkins-lab2.git'
             }
         }
 
-        stage('Deploy') {
+        stage('Build Maven Project') {
             steps {
-                // Simulate deployment (e.g., copying the .war file)
-                echo 'Deploying the web app...'
+                sh 'mvn clean package'
             }
         }
-    }
-    
-    post {
-        success {
-            echo 'Pipeline executed successfully!'
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([string(credentialsId: 'docker-hub-password', variable: 'DOCKER_PASS')]) {
+                    // Docker Hub login using Access Token
+                    sh "echo $DOCKER_PASS | docker login -u aliciansingca --password-stdin"
+                }
+            }
         }
-        failure {
-            echo 'Pipeline failed!'
+
+        stage('Docker Build') {
+            steps {
+                sh "docker build -t ${DOCKER_IMAGE} ."
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                sh "docker push ${DOCKER_IMAGE}"
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                sh "docker rmi ${DOCKER_IMAGE}"
+            }
         }
     }
 }
