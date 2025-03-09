@@ -15,7 +15,10 @@ pipeline {
 
         stage('Build Maven Project') {
             steps {
-                sh 'mvn clean package'
+                script {
+                    // Ensure Maven is used from the correct location or install it if needed
+                    sh 'mvn clean package'
+                }
             }
         }
 
@@ -29,19 +32,28 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE} ."
+                script {
+                    // Build the Docker image
+                    sh "docker build -t ${DOCKER_IMAGE}:latest ."
+                }
             }
         }
 
         stage('Docker Push') {
             steps {
-                sh "docker push ${DOCKER_IMAGE}"
+                script {
+                    // Push the Docker image to Docker Hub
+                    sh "docker push ${DOCKER_IMAGE}:latest"
+                }
             }
         }
 
         stage('Cleanup') {
             steps {
-                sh "docker rmi ${DOCKER_IMAGE}"
+                script {
+                    // Clean up the local Docker image
+                    sh "docker rmi ${DOCKER_IMAGE}:latest"
+                }
             }
         }
     }
