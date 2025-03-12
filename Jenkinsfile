@@ -1,60 +1,67 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven 3.9.9' 
+    }
+
     environment {
-        DOCKER_IMAGE = 'aliciansingca/comp367-webapp'  // Docker image name
-        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'  // Set in Jenkins credentials
+        DOCKER_HUB_USER = 'aliciasingca' 
+        IMAGE_NAME = 'aliciasingca/comp367-webapp' 
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/AliciaSingca301336105/jenkins-lab2.git'
+                git branch: 'main', url: 'https://github.com/AliciaSingca301336105/jenkins-lab2.git'
             }
         }
 
         stage('Build Maven Project') {
             steps {
-                script {
-                    // Ensure Maven is used from the correct location or install it if needed
-                    sh 'mvn clean package'
-                }
+                bat 'mvn clean package'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                bat 'mvn test'
             }
         }
 
         stage('Docker Login') {
             steps {
-                withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKER_HUB_PASSWORD')]) {
+                    bat "echo %DOCKER_HUB_PASSWORD% | docker login -u %DOCKER_HUB_USER% --password-stdin"
                 }
             }
         }
 
         stage('Docker Build') {
             steps {
-                script {
-                    // Build the Docker image
-                    sh "docker build -t ${DOCKER_IMAGE}:latest ."
-                }
+                bat "docker build -t %DOCKER_HUB_USER%/%IMAGE_NAME% ."
             }
         }
 
         stage('Docker Push') {
             steps {
-                script {
-                    // Push the Docker image to Docker Hub
-                    sh "docker push ${DOCKER_IMAGE}:latest"
-                }
+                bat "docker push %DOCKER_HUB_USER%/%IMAGE_NAME%"
             }
         }
 
-        stage('Cleanup') {
+        stage('Deploy') {
             steps {
-                script {
-                    // Clean up the local Docker image
-                    sh "docker rmi ${DOCKER_IMAGE}:latest"
-                }
+                bat "docker run -d -p 9090:8080 %DOCKER_HUB_USER%/%IMAGE_NAME%"
             }
         }
     }
-}
+
+    post {
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+} // Closing brace for the pipeline block
