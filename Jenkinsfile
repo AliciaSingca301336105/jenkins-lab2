@@ -30,20 +30,19 @@ pipeline {
         }
 
         stage('Docker Login') {
-    steps {
-        withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKER_HUB_PASSWORD')]) {
-            script {
-                // You need to explicitly define the username for Docker login
-                def DOCKER_HUB_USER = 'aliciasingca'  // Your Docker Hub username
-
-                // Execute the Docker login with the password from the secret text
-                bat """
-                    echo %DOCKER_HUB_PASSWORD% | docker login -u ${DOCKER_HUB_USER} --password-stdin
-                """
+            steps {
+                withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKER_HUB_PASSWORD')]) {
+                    script {
+                        def loginResult = bat returnStatus: true, script: """
+                            echo %DOCKER_HUB_PASSWORD% | docker login -u %DOCKER_HUB_USER% --password-stdin
+                        """
+                        if (loginResult != 0) {
+                            error "Docker login failed. Please check your credentials."
+                        }
+                    }
+                }
             }
         }
-    }
-}
 
         stage('Docker Build') {
             steps {
@@ -72,4 +71,4 @@ pipeline {
             echo 'Pipeline failed!'
         }
     }
-} // Closing brace for the pipeline block
+}
