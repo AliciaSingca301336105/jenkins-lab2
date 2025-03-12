@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         DOCKER_HUB_USER = 'aliciasingca' 
-        IMAGE_NAME = 'aliciasingca/comp367-webapp' 
+        IMAGE_NAME = 'comp367-webapp' 
     }
 
     stages {
