@@ -31,10 +31,15 @@ pipeline {
 
         stage('Docker Login') {
     steps {
-        withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+        withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKER_HUB_PASSWORD')]) {
             script {
-                echo "Logging in to Docker Hub"
-                bat "echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin"
+                // You need to explicitly define the username for Docker login
+                def DOCKER_HUB_USER = 'aliciasingca'  // Your Docker Hub username
+
+                // Execute the Docker login with the password from the secret text
+                bat """
+                    echo %DOCKER_HUB_PASSWORD% | docker login -u ${DOCKER_HUB_USER} --password-stdin
+                """
             }
         }
     }
