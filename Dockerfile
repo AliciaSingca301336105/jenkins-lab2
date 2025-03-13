@@ -1,13 +1,14 @@
-# Use an official Maven image to build the application
-FROM maven:3.8.5-openjdk-17 AS build
+# Use an official Tomcat base image
+FROM tomcat:9.0-jdk11-openjdk-slim
 
-WORKDIR /app
-COPY . .  # Copies the source code into the image
-RUN mvn clean package  # Builds the Maven project
+# Remove default webapps to avoid conflicts
+RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Use Tomcat to run the application
-FROM tomcat:9.0
-COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war  # Copy WAR file to Tomcat's webapps directory
+# Copy your WAR file into the Tomcat webapps directory
+COPY target/maven-web-app-lab2-0.0.1-SNAPSHOT.war /usr/local/tomcat/webapps/app.war
 
-EXPOSE 8080  # Exposes the port for the web app
-CMD ["catalina.sh", "run"]  # Start the Tomcat server
+# Expose the default Tomcat port
+EXPOSE 8080
+
+# Start Tomcat
+CMD ["catalina.sh", "run"]
