@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.9.9' 
+        maven 'Maven 3.9.9'  
     }
 
     environment {
-        DOCKER_HUB_USER = 'aliciasingca' 
-        IMAGE_NAME = 'comp367-webapp' 
+        DOCKER_HUB_USER = 'aliciasingca'  
+        IMAGE_NAME = 'comp367-webapp'  
     }
 
     stages {
@@ -19,13 +19,13 @@ pipeline {
 
         stage('Build Maven Project') {
             steps {
-                bat 'mvn clean package'
+                bat 'mvn clean package'  // Make sure Maven is installed in the PATH
             }
         }
 
         stage('Test') {
             steps {
-                bat 'mvn test'
+                bat 'mvn test'  // Run tests
             }
         }
 
@@ -41,19 +41,25 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                bat "docker build -t %DOCKER_HUB_USER%/%IMAGE_NAME% ."
+                bat """
+                    docker build -t %DOCKER_HUB_USER%/%IMAGE_NAME% .
+                """
             }
         }
 
         stage('Docker Push') {
             steps {
-                bat "docker push %DOCKER_HUB_USER%/%IMAGE_NAME%"
+                bat """
+                    docker push %DOCKER_HUB_USER%/%IMAGE_NAME%
+                """
             }
         }
 
         stage('Deploy') {
             steps {
-                bat "docker run -d -p 8080:8080 %DOCKER_HUB_USER%/%IMAGE_NAME%"
+                bat """
+                    docker run -d -p 8080:8080 %DOCKER_HUB_USER%/%IMAGE_NAME%
+                """
             }
         }
     }
