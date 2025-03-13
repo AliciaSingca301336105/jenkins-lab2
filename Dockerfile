@@ -10,4 +10,4 @@ FROM tomcat:9.0
 COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war  # Copy WAR file to Tomcat's webapps directory
 
 EXPOSE 8080  # Exposes the port for the web app
-CMD ["catalina.sh", "run"]  # Start Tomcat server
+CMD ["catalina.sh", "run"]  # Start the Tomcat server
