@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        DOCKER_HUB_USER = 'aliciasingca'  
+        DOCKER_HUB_USER = 'aliciasingca'  //to check
         IMAGE_NAME = 'comp367-webapp'  
     }
 
